@@ -1,11 +1,10 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { resolve } from "path";
-
 import dotenv from "dotenv";
+
 dotenv.config();
 
-// Importar Entidades aquí
 import { Role } from "../models/Role";
 import { Sede } from "../models/Sede";
 import { User } from "../models/User";
@@ -21,13 +20,11 @@ import { Voucher } from "../models/Comprobante";
 import { VoucherDetail } from "../models/DetalleComprobante";
 import { Sale } from "../models/Venta";
 
-// Entidades de Integración con IA
 import { AIModel } from "../models/AIModel";
 import { DemandPrediction } from "../models/DemandPrediction";
 import { SupplierInvoice } from "../models/SupplierInvoice";
 import { SupplierInvoiceDetail } from "../models/SupplierInvoiceDetail";
 
-// Variables de entorno
 const DB_HOST = process.env.DB_HOST || "localhost";
 const DB_PORT = parseInt(process.env.DB_PORT || "5432", 10);
 const DB_USER = process.env.DB_USER || "postgres";
@@ -42,35 +39,17 @@ export const AppDataSource = new DataSource({
   username: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,
+
   synchronize: false,
+
   //synchronize: process.env.NODE_ENV === "development",
   logging: process.env.NODE_ENV === "development" ? ["query", "error"] : false,
 
-  entities: [
-    Role,
-    Sede,
-    User,
-    CashBox,
-    CashOpening,
-    Cliente,
-    Category,
-    Producto,
-    Table,
-    Order,
-    OrderDetail,
-    Voucher,
-    VoucherDetail,
-    Sale,
-    // Entidades de Integración con IA
-    AIModel,
-    DemandPrediction,
-    SupplierInvoice,
-    SupplierInvoiceDetail,
-  ],
-  migrations: [
-    // Agregar migraciones aquí
-  ],
-  subscribers: [
-    // Agregar suscriptores aquí
-  ],
+  //entities: [resolve(process.cwd(), "src/models/**/*.{ts,js}")],
+  //migrations: [resolve(process.cwd(), "src/migrations/**/*.{ts,js}")],
+
+  entities: [resolve(process.cwd(), "dist/models/**/*.{js,ts}")],
+  migrations: [resolve(process.cwd(), "dist/migrations/**/*.{js,ts}")],
+
+  subscribers: [],
 });

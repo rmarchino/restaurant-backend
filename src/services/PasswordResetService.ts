@@ -35,7 +35,7 @@ export class PasswordResetService {
     if (!userId) throw new Error("Token inválido o expirado.");
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.userRepository.updatePassword(Number(userId), hashedPassword);
+    await this.userRepository.updatePassword(userId, hashedPassword);
 
     await redisClient.del(`pw-reset:${token}`);
   }

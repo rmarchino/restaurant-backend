@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env
+.env.local
+.env.docker
+.vscode
+Dockerfile.dev
+docker-compose.override.yml
