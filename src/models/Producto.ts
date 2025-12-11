@@ -22,6 +22,7 @@ export class Producto {
     // Relación ManyToOne con Categoría
     @Column({ type: "bigint", nullable: true })
     categoria_id!: number | null;
+    
     @ManyToOne(() => Category, (category) => category.products)
     @JoinColumn({ name: "categoria_id" })
     category!: Category | null;

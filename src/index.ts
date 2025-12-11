@@ -8,7 +8,10 @@ import { AppDataSource } from "./config/data-source";
 import logger from "./utils/logger";
 import { authRoutes } from "./routes/AuthRoutes";
 import { userRoutes } from "./routes/UserRoutes";
+import { ocrRoutes } from "./routes/ocr.routes";
 import { redisClient } from "./config/redisClient";
+require('dotenv').config();
+
 
 // Inicialización de la app
 const app: Application = express();
@@ -41,6 +44,7 @@ app.get("/", async (req: Request, res: Response) => {
 // Rutas de la aplicación
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api", ocrRoutes);
 
 // Función principal de arranque
 const startServer = async () => {

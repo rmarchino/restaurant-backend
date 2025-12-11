@@ -5,6 +5,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const isProd = process.env.NODE_ENV === "production";
+
+const dbUrl = process.env.DATABASE_URL;
+
 import { Role } from "../models/Role";
 import { Sede } from "../models/Sede";
 import { User } from "../models/User";
@@ -31,14 +35,17 @@ const DB_USER = process.env.DB_USER || "postgres";
 const DB_PASSWORD = process.env.DB_PASSWORD || "root";
 const DB_NAME = process.env.DB_NAME || "restaurant_db";
 
-
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: DB_HOST,
-  port: DB_PORT,
-  username: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
+  ...(dbUrl
+    ? { url: dbUrl }
+    : {
+        host: DB_HOST,
+        port: DB_PORT,
+        username: DB_USER,
+        password: DB_PASSWORD,
+        database: DB_NAME,
+      }),
 
   synchronize: false,
 
@@ -48,8 +55,18 @@ export const AppDataSource = new DataSource({
   //entities: [resolve(process.cwd(), "src/models/**/*.{ts,js}")],
   //migrations: [resolve(process.cwd(), "src/migrations/**/*.{ts,js}")],
 
-  entities: [resolve(process.cwd(), "dist/models/**/*.{js,ts}")],
-  migrations: [resolve(process.cwd(), "dist/migrations/**/*.{js,ts}")],
+  entities: [
+    resolve(
+      process.cwd(),
+      isProd ? "dist/models/**/*.{js}" : "src/models/**/*.{ts,js}"
+    ),
+  ],
+  migrations: [
+    resolve(
+      process.cwd(),
+      isProd ? "dist/migrations/**/*.{js}" : "src/migrations/**/*.{ts,js}"
+    ),
+  ],
 
   subscribers: [],
 });

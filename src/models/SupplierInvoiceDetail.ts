@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from "typeorm";
 import { SupplierInvoice } from "./SupplierInvoice";
 import { Producto } from "./Producto";
@@ -13,37 +14,63 @@ export class SupplierInvoiceDetail {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id!: number;
 
-  // Relación ManyToOne con SupplierInvoice
-  @Column({ type: "bigint", nullable: false })
-  factura_id!: number;
-  @ManyToOne(() => SupplierInvoice, (invoice) => invoice.details)
+  // Relación Factura
+  @Column({ name: "factura_id", type: "bigint", nullable: false })
+  facturaId!: number;
+
+  @ManyToOne(() => SupplierInvoice, (invoice) => invoice.details, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "factura_id" })
   invoice!: SupplierInvoice;
 
-  @Column({ type: 'varchar', length: 150, nullable: true }) 
-  producto_detectado!: string | null;
+  @Column({
+    name: "producto_detectado",
+    type: "varchar",
+    length: 150,
+    nullable: true,
+  })
+  productoDetectado!: string | null;
 
-  @Column({ type: 'int', default: 0 })
-  cantidad_detectada!: number;
-
-  @Column({ type: "decimal", precision: 10, scale: 2, default: 0.0 })
-  precio_unitario!: number;
-
-  total!: number;
-
-  // Relación ManyToOne con Producto
-  @Column({ type: 'bigint', nullable: true })
-  producto_id!: number | null;
-  @ManyToOne(() => Producto, (product) => product.supplierInvoiceDetails)
-  @JoinColumn({ name: 'producto_id' })
-  product!: Producto;
-
-  @Column({ type: 'decimal', precision: 5, scale: 4, nullable: true })
-  confianza_ia!: number | null;
+  @Column({ name: "cantidad_detectada", type: "int", default: 0 })
+  cantidadDetectada!: number;
 
   @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    name: "precio_unitario",
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    default: 0.0,
   })
-  fecha_registro!: Date;
+  precioUnitario!: number;
+
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    default: 0.0,
+    insert: false,
+    update: false,
+  })
+  total!: number;
+
+  // Relación con Producto (Inventario)
+  @Column({ name: "producto_id", type: "bigint", nullable: true })
+  productoId!: number | null;
+
+  @ManyToOne(() => Producto, (product) => product.supplierInvoiceDetails)
+  @JoinColumn({ name: "producto_id" })
+  product!: Producto | null;
+
+  @Column({
+    name: "confianza_ia",
+    type: "decimal",
+    precision: 5,
+    scale: 4,
+    nullable: true,
+  })
+  confianzaIa!: number | null;
+
+  @CreateDateColumn({ name: "fecha_registro", type: "timestamp" })
+  fechaRegistro!: Date;
 }

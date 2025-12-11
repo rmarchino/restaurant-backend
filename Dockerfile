@@ -1,25 +1,23 @@
+# Build stage
 FROM node:20-alpine AS build
-
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm install --production=false
-
+RUN npm ci
 COPY . .
 RUN npm run build
 
-
-# --- Runtime image --
+# Runtime stage
 FROM node:20-alpine
-
 WORKDIR /app
-
 ENV NODE_ENV=production
-
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 
 EXPOSE 4000
 
-CMD ["node", "dist/index.js"]
+# Opción A: correr sin migraciones automáticas
+# CMD ["node", "dist/index.js"]
+
+# Opción B: correr con migraciones automáticas
+CMD ["node", "dist/scripts/runMigrationsAndStart.js"]

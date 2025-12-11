@@ -19,46 +19,55 @@ export class SupplierInvoice {
   @Column({ length: 150 })
   proveedor!: string;
 
-  @Column({ length: 50 })
-  numero_factura!: string;
+  @Column({ name: "numero_factura", length: 50 })
+  numeroFactura!: string;
 
-  @Column({ type: "date", nullable: true })
-  fecha_emision!: Date | null;
+  @Column({ name: "fecha_emision", type: "date", nullable: true })
+  fechaEmision!: string | null;
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   total!: number | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  ruta_archivo!: string | null;
+  @Column({
+    name: "ruta_archivo",
+    type: "varchar",
+    length: 255,
+    nullable: true,
+  })
+  rutaArchivo!: string | null;
 
   @Column({
+    name: "procesado_por_ia",
     type: "enum",
     enum: AIProcessed,
     default: AIProcessed.NO,
   })
-  procesado_por_ia!: AIProcessed;
+  procesadoPorIA!: AIProcessed;
 
-  // Relación ManyToOne con AIModel
-    @Column({ type: "bigint", nullable: true })
-    modelo_ia_id!: number | null;
-    @ManyToOne(() => AIModel, (model) => model.supplierInvoices)
-    @JoinColumn({ name: "modelo_ia_id" })
-    aiModel!: AIModel | null;
+  // Relación con Modelo IA
+  @Column({ name: "modelo_ia_id", type: "bigint", nullable: true })
+  modeloIaId!: number | null;
 
-    @Column({ type: 'timestamp', nullable: true })
-    fecha_procesamiento!: Date | null;
+  @ManyToOne(() => AIModel, (model) => model.supplierInvoices)
+  @JoinColumn({ name: "modelo_ia_id" })
+  aiModel!: AIModel | null;
 
-    @Column({
-        type: 'enum',
-        enum: InvoiceProcessingStatus,
-        default: InvoiceProcessingStatus.PENDIENTE,
-    })
-    estado!: InvoiceProcessingStatus;
+  @Column({ name: "fecha_procesamiento", type: "timestamp", nullable: true })
+  fechaProcesamiento!: Date | null;
 
-    @Column({ type: 'text', nullable: true })
-    observaciones!: string | null;
+  @Column({
+    type: "enum",
+    enum: InvoiceProcessingStatus,
+    default: InvoiceProcessingStatus.PENDIENTE,
+  })
+  estado!: InvoiceProcessingStatus;
 
-    // Relaciones:
-    @OneToMany(() => SupplierInvoiceDetail, (detail) => detail.invoice)
-    details!: SupplierInvoiceDetail[];
+  @Column({ type: "text", nullable: true })
+  observaciones!: string | null;
+
+  // // Relación con Detalles
+  @OneToMany(() => SupplierInvoiceDetail, (detail) => detail.invoice, {
+    cascade: true,
+  })
+  details!: SupplierInvoiceDetail[];
 }
