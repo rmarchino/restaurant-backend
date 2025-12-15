@@ -60,7 +60,7 @@ export class OcrController {
     }
   }
 
-  // 3. Obtener resultados
+  // 3. Obtener resultados de una factura
   async getResults(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -86,7 +86,23 @@ export class OcrController {
     }
   }
 
-  // 4. Actualizar factura manualmente
+  // 4. Obtener todas las facturas
+  async getAllResults(req: Request, res: Response) {
+    try {
+      const facturas = await ocrService.getAllInvoices();
+      return res.status(200).json({
+        success: true,
+        data: facturas,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Error al obtener facturas",
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  }
+
+  // 5. Actualizar factura manualmente
   async updateInvoice(req: Request, res: Response) {
     try {
       const validation = UpdateInvoiceDto.safeParse(req.body);

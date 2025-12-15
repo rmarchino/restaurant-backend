@@ -108,6 +108,13 @@ export class OcrService {
   }
 
   /**
+   * Obtiene todas las facturas procesadas
+   */
+  async getAllInvoices(): Promise<SupplierInvoice[]> {
+    return await this.facturaRepository.find({ relations: ["details"] });
+  }
+
+  /**
    * Función auxiliar para parsear texto crudo (Heurística básica)
    */
   private parseInvoiceText(text: string) {

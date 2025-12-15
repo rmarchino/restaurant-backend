@@ -11,12 +11,16 @@ router.post("/ocr/upload", upload.single("factura"), (req, res, next) => {
   controller.upload(req, res).catch(next);
 });
 
-router.post("/ocr/process", authenticateToken, (req, res, next) => {
+router.post("/ocr/process", (req, res, next) => {
   controller.process(req, res).catch(next);
 });
 
-router.get("/ocr/results/:id", authenticateToken, (req, res, next) => {
+router.get("/ocr/results/:id", (req, res, next) => {
   controller.getResults(req, res).catch(next);
+});
+
+router.get("/ocr/results", (req, res, next) => {
+  controller.getAllResults(req, res).catch(next);
 });
 
 export const ocrRoutes = router;
