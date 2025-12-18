@@ -41,7 +41,8 @@ export class OcrService {
     const factura = await this.facturaRepository.findOneBy({ id: facturaId });
 
     if (!factura) throw new Error("Factura no encontrada");
-    if (!factura.rutaArchivo) throw new Error("La factura no tiene un archivo asociado");
+    if (!factura.rutaArchivo)
+      throw new Error("La factura no tiene un archivo asociado");
 
     try {
       // 1. Llamada a Google Cloud Vision API
@@ -59,9 +60,11 @@ export class OcrService {
 
       // 3. Actualizar Cabecera de Factura
       factura.proveedor = extractedData.proveedor || "Proveedor Detectado";
-      factura.numeroFactura = extractedData.numeroFactura || `OCR-${Date.now()}`;
+      factura.numeroFactura =
+        extractedData.numeroFactura || `OCR-${Date.now()}`;
       factura.total = extractedData.total || 0;
-      factura.fechaEmision = extractedData.fecha || new Date().toISOString().split("T")[0];
+      factura.fechaEmision =
+        extractedData.fecha || new Date().toISOString().split("T")[0];
       factura.procesadoPorIA = AIProcessed.SI;
       factura.fechaProcesamiento = new Date();
       factura.estado = InvoiceProcessingStatus.PROCESADO;
@@ -118,8 +121,9 @@ export class OcrService {
    * Función auxiliar para parsear texto crudo (Heurística básica)
    */
   private parseInvoiceText(text: string) {
-    // Regex básicos para buscar patrones comunes en facturas peruanas/latinas
-    const totalRegex = /(?:TOTAL|Total|PAGAR|IMPORTTE)[\s:]*([S\/\$]?)\s*([\d,]+\.?\d*)/i;
+    // 1. Regex básicos
+    const totalRegex =
+      /(?:TOTAL|Total|PAGAR|IMPORTTE)[\s:]*([S\/\$]?)\s*([\d,]+\.?\d*)/i;
     const fechaRegex = /(\d{2}[-\/]\d{2}[-\/]\d{4})/;
     const rucRegex = /(?:RUC|R\.U\.C\.)[\s:]*(\d{11})/;
 
@@ -128,29 +132,62 @@ export class OcrService {
     const fechaMatch = text.match(fechaRegex);
     const rucMatch = text.match(rucRegex);
 
-    // Simulamos items: En una implementación real, se debe analizar la posición (boundingPoly)
+    // 2. Parseo de items OCR
     const lines = text.split("\n");
-    const items = [];
+    const items: Array<{
+      descripcion: string;
+      cantidad: number;
+      precio: number;
+    }> = [];
 
-    for (const line of lines) {
-      // Busca líneas que terminen en número (precio) y tengan texto antes
-      const lineMatch = line.match(/^(.+?)\s+(\d+\.\d{2})$/);
-      if (lineMatch && !line.toLowerCase().includes("total")) {
-        items.push({
-          descripcion: lineMatch[1].trim(),
-          cantidad: 1,
-          precio: parseFloat(lineMatch[2]),
-        });
+    for (const rawLine of lines) {
+      const line = rawLine.replace(/\s+/g, " ").trim();
+
+      // Ignorar lineas basura
+      if (
+        !line ||
+        line.length < 5 ||
+        line.toLowerCase().includes("total") ||
+        line.toLowerCase().includes("subtotal") ||
+        line.toLowerCase().includes("igv") ||
+        line.toLowerCase().includes("ruc") ||
+        line.toLowerCase().includes("factura")
+      ) {
+        continue;
       }
+
+      // Buscar un precio al final de la línea
+      const priceMatch = line.match(/(\d+\.\d{2})$/);
+      if (!priceMatch) continue;
+
+      const precio = parseFloat(priceMatch[1]);
+
+      // Quitar precio del texto para obtener descripción
+      const descripcion = line.replace(priceMatch[1], "").trim();
+
+      if (descripcion.length < 3) continue;
+
+      items.push({
+        descripcion,
+        cantidad: 1,
+        precio,
+      });
     }
 
+    // Retorno final
     return {
       proveedor: rucMatch
         ? `Proveedor RUC ${rucMatch[1]}`
         : "Proveedor No Identificado",
+
       numeroFactura: `F-${Math.floor(Math.random() * 10000)}`,
-      total: totalMatch ? parseFloat(totalMatch[2].replace(",", "")) : 0.0,
+
+      total: totalMatch
+        ? parseFloat(totalMatch[2].replace(",", ""))
+        : items.reduce((sum, i) => sum + i.precio * i.cantidad, 0),
+
       fecha: fechaMatch ? this.formatDate(fechaMatch[1]) : null,
+
       items:
         items.length > 0
           ? items
