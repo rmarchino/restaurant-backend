@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
+import { Exclude } from "class-transformer";
 import { Category } from "./Categoria";
 import { ProductStatus } from "../enums/ProductStatus.enum";
 import { ProductOrigin } from "../enums/ProductOrigin.enum";
@@ -13,6 +14,7 @@ import { OrderDetail } from "./DetallePedido";
 import { VoucherDetail } from "./DetalleComprobante";
 import { DemandPrediction } from "./DemandPrediction";
 import { SupplierInvoiceDetail } from "./SupplierInvoiceDetail";
+
 
 @Entity('productos')
 export class Producto {
@@ -74,5 +76,6 @@ export class Producto {
     demandPredictions?: DemandPrediction[];
 
     @OneToMany(() => SupplierInvoiceDetail, (detail) => detail.product)
+    @Exclude()
     supplierInvoiceDetails?: SupplierInvoiceDetail[];
 }

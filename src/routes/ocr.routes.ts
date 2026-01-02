@@ -23,4 +23,8 @@ router.get("/ocr/results", (req, res, next) => {
   controller.getAllResults(req, res).catch(next);
 });
 
+router.put("/ocr/update", (req, res, next) => {
+  controller.updateInvoice(req, res).catch(next);
+});
+
 export const ocrRoutes = router;

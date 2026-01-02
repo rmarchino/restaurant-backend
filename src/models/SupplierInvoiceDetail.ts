@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { SupplierInvoice } from "./SupplierInvoice";
 import { Producto } from "./Producto";
+import { Exclude } from "class-transformer";
 
 @Entity("detalle_facturas_proveedores")
 export class SupplierInvoiceDetail {
@@ -15,13 +16,11 @@ export class SupplierInvoiceDetail {
   id!: number;
 
   // Relación Factura
-  @Column({ name: "factura_id", type: "bigint", nullable: false })
-  facturaId!: number;
-
   @ManyToOne(() => SupplierInvoice, (invoice) => invoice.details, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "factura_id" })
+  @Exclude()
   invoice!: SupplierInvoice;
 
   @Column({
@@ -60,6 +59,7 @@ export class SupplierInvoiceDetail {
 
   @ManyToOne(() => Producto, (product) => product.supplierInvoiceDetails)
   @JoinColumn({ name: "producto_id" })
+  @Exclude()
   product!: Producto | null;
 
   @Column({

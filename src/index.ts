@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import "module-alias/register";
 import "dotenv/config";
 import express, { Application, Request, Response } from "express";
@@ -10,12 +11,14 @@ import { authRoutes } from "./routes/AuthRoutes";
 import { userRoutes } from "./routes/UserRoutes";
 import { ocrRoutes } from "./routes/ocr.routes";
 import { redisClient } from "./config/redisClient";
-require('dotenv').config();
 
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
 // Inicialización de la app
 const app: Application = express();
-const PORT: number = parseInt(process.env.PORT || "4000", 10);
+const PORT: number = Number(process.env.PORT || 4000);
 
 // Middlewares globales
 app.use(helmet());
@@ -49,19 +52,19 @@ app.use("/api", ocrRoutes);
 // Función principal de arranque
 const startServer = async () => {
   try {
-    // Conexión a Redis
-    logger.info("🔄 Conectando a Redis...");
-    await redisClient.connect();
-    logger.info("Conectado a Redis correctamente.");
+    if (process.env.REDIS_URL) {
+      logger.info("🔄 Conectando a Redis...");
+      await redisClient.connect();
+      logger.info("Conectado a Redis correctamente.");
+    } else {
+      logger.warn("⚠️ Redis no configurado, se omite conexión.");
+    }
 
-    // Conexión a la base de datos
     logger.info("🔄 Conectando a la base de datos...");
     await AppDataSource.initialize();
     logger.info("Conexión a la base de datos establecida.");
 
-    // Iniciar servidor Express
     app.listen(PORT, () => {
-      console.log(`Servidor escuchando en http://localhost:${PORT}`);
       logger.info(`Servidor escuchando en el puerto ${PORT}`);
     });
   } catch (error) {
